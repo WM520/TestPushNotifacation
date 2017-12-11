@@ -76,6 +76,9 @@
 //    //语音合成器会生成音频
 //    [self.synthesizer speakUtterance:speechUtterance];
 //    [self playMusic:@"jprefund" type:@"mp3"];
+    // !!!: 只执行一次，默认开关全部打开
+    NSUserDefaults *userDefault = [[NSUserDefaults alloc] initWithSuiteName:@"group.testpush"];
+    [userDefault setBool:YES forKey:@"voice_value"];
     return YES;
 }
 

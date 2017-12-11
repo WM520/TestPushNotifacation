@@ -7,6 +7,9 @@
 //
 
 #import "ViewController.h"
+#import <TestPushExtensionKit/TestPushExtensionKit.h>
+#import "IBDataBase.h"
+#import "IBNewsModel.h"
 
 @interface ViewController ()
 
@@ -17,6 +20,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+}
+- (IBAction)action:(id)sender {
+    NSArray * main = [[IBDataBase sharedDataBase] getAllPerson];
+    NSLog(@"%@", main);
 }
 
 

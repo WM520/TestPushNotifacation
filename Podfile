@@ -4,4 +4,8 @@ target 'TestPushNotifacation' do
 pod 'JPush'
 end
 
-
+target 'WMServiceNotication' do
+    
+    platform:ios, '10.0'
+    pod 'YYModel'
+end

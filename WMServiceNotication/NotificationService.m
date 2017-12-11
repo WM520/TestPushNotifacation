@@ -8,6 +8,10 @@
 
 #import "NotificationService.h"
 #import <AVFoundation/AVFoundation.h>
+#import <TestPushExtensionKit/TestPushExtensionKit.h>
+#import "IBDataBase.h"
+#import "IBNewsModel.h"
+#import <YYModel/YYModel.h>
 
 @interface NotificationService ()
 @property (nonatomic, strong) AVSpeechSynthesizer *synthesizer;
@@ -23,39 +27,49 @@
     self.bestAttemptContent = [request.content mutableCopy];
     
     // Modify the notification content here...
-//    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
-//    NSString *voiceString = nil;
-//    voiceString = [NSString stringWithFormat:@"退款%@元！", @"10"];
-//    //  语音合成
-//    self.synthesizer = [[AVSpeechSynthesizer alloc] init];
-//    AVSpeechUtterance *speechUtterance = [AVSpeechUtterance speechUtteranceWithString:voiceString];
-//    //设置语言类别（不能被识别，返回值为nil）
-//    speechUtterance.voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"zh-CN"];
-//    //设置语速快慢
-//    speechUtterance.rate = 0.55;
-//    //语音合成器会生成音频
-//    [self.synthesizer speakUtterance:speechUtterance];
-//    self.contentHandler(self.bestAttemptContent);
-#warning 这里是添加一些事件的，比如点击进入查看详情，快捷回复等
-    NSMutableArray *actionMutableArr = [[NSMutableArray alloc] initWithCapacity:1];
-    UNNotificationAction * actionA  =[UNNotificationAction actionWithIdentifier:@"ActionA" title:@"不感兴趣" options:UNNotificationActionOptionAuthenticationRequired];
+    self.bestAttemptContent.title = [NSString stringWithFormat:@"%@ [modified]", self.bestAttemptContent.title];
+    //  获取共享域的偏好设置
+    NSUserDefaults *userDefault = [[NSUserDefaults alloc] initWithSuiteName:@"group.testpush"];
     
-    UNNotificationAction * actionB = [UNNotificationAction actionWithIdentifier:@"ActionB" title:@"不感兴趣" options:UNNotificationActionOptionDestructive];
-    
-    UNNotificationAction * actionC = [UNNotificationAction actionWithIdentifier:@"ActionC" title:@"进去瞅瞅" options:UNNotificationActionOptionForeground];
-    UNTextInputNotificationAction * actionD = [UNTextInputNotificationAction actionWithIdentifier:@"ActionD" title:@"作出评论" options:UNNotificationActionOptionDestructive textInputButtonTitle:@"send" textInputPlaceholder:@"say some thing"];
-    
-    [actionMutableArr addObjectsFromArray:@[actionA,actionB,actionC,actionD]];
-    
-    if (actionMutableArr.count) {
-        UNNotificationCategory * notficationCategory = [UNNotificationCategory categoryWithIdentifier:@"categoryNoOperationAction" actions:actionMutableArr intentIdentifiers:@[@"ActionA",@"ActionB",@"ActionC",@"ActionD"] options:UNNotificationCategoryOptionCustomDismissAction];
-        
-        [[UNUserNotificationCenter currentNotificationCenter] setNotificationCategories:[NSSet setWithObject:notficationCategory]];
-        
-    }
-#pragma mark====================添加=categoryIdentifier============
-    self.bestAttemptContent.categoryIdentifier = @"myNotificationCategory";
+    //  解析推送自定义参数transInfo
+    NSDictionary *transInfo = [self dictionaryWithUserInfo:self.bestAttemptContent.userInfo];
+    IBNewsModel *model = [IBNewsModel yy_modelWithJSON:transInfo];
+    //  数据本地存储
+    [[IBDataBase sharedDataBase] addModel:model];
+    BOOL canSound = [userDefault boolForKey:@"voice_value"];
+    NSLog(@"%d", canSound);
+    NSString *voiceString = nil;
+    voiceString = [NSString stringWithFormat:@"退款%@元！", @"10"];
+    //  语音合成
+    self.synthesizer = [[AVSpeechSynthesizer alloc] init];
+    AVSpeechUtterance *speechUtterance = [AVSpeechUtterance speechUtteranceWithString:voiceString];
+    //设置语言类别（不能被识别，返回值为nil）
+    speechUtterance.voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"zh-CN"];
+    //设置语速快慢
+    speechUtterance.rate = 0.55;
+    //语音合成器会生成音频
+    [self.synthesizer speakUtterance:speechUtterance];
     self.contentHandler(self.bestAttemptContent);
+#warning 这里是添加一些事件的，比如点击进入查看详情，快捷回复等
+//    NSMutableArray *actionMutableArr = [[NSMutableArray alloc] initWithCapacity:1];
+//    UNNotificationAction * actionA  =[UNNotificationAction actionWithIdentifier:@"ActionA" title:@"不感兴趣" options:UNNotificationActionOptionAuthenticationRequired];
+//
+//    UNNotificationAction * actionB = [UNNotificationAction actionWithIdentifier:@"ActionB" title:@"不感兴趣" options:UNNotificationActionOptionDestructive];
+//
+//    UNNotificationAction * actionC = [UNNotificationAction actionWithIdentifier:@"ActionC" title:@"进去瞅瞅" options:UNNotificationActionOptionForeground];
+//    UNTextInputNotificationAction * actionD = [UNTextInputNotificationAction actionWithIdentifier:@"ActionD" title:@"作出评论" options:UNNotificationActionOptionDestructive textInputButtonTitle:@"send" textInputPlaceholder:@"say some thing"];
+//
+//    [actionMutableArr addObjectsFromArray:@[actionA,actionB,actionC,actionD]];
+//
+//    if (actionMutableArr.count) {
+//        UNNotificationCategory * notficationCategory = [UNNotificationCategory categoryWithIdentifier:@"categoryNoOperationAction" actions:actionMutableArr intentIdentifiers:@[@"ActionA",@"ActionB",@"ActionC",@"ActionD"] options:UNNotificationCategoryOptionCustomDismissAction];
+//
+//        [[UNUserNotificationCenter currentNotificationCenter] setNotificationCategories:[NSSet setWithObject:notficationCategory]];
+//
+//    }
+#pragma mark====================添加=categoryIdentifier============
+//    self.bestAttemptContent.categoryIdentifier = @"myNotificationCategory";
+//    self.contentHandler(self.bestAttemptContent);
 //    NSDictionary *dict =  [self dictionaryWithUserInfo:self.bestAttemptContent.userInfo];
 //    //    NSDictionary *notiDict = dict[@"aps"];
 //    NSString *mediaUrl = [NSString stringWithFormat:@"%@",dict[@"media"][@"url"]];
